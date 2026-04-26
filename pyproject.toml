@@ -1,0 +1,80 @@
+[project]
+name = "pathmon-analyzer"
+version = "0.1.0"
+description = "Analyze pathmon MTR logs from GCS for latency and packet loss investigation"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Chris Jones", email = "ipv6freely@gmail.com"},
+]
+
+# AI Disclosure: This project was developed with assistance from Claude Opus 4.5
+# (Anthropic's AI assistant) via Windsurf/Cascade. See AI.md for details.
+keywords = ["mtr", "traceroute", "network", "monitoring", "gcs", "pagerduty", "sip", "voip"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Telecommunications Industry",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Networking :: Monitoring",
+    "Topic :: System :: Systems Administration",
+]
+dependencies = [
+    "google-cloud-storage>=2.14.0",
+    "click>=8.1.0",
+    "rich>=13.0.0",
+    "plotly>=5.18.0",
+    "pandas>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ipv6freely/pathmon-analyzer"
+Repository = "https://github.com/ipv6freely/pathmon-analyzer"
+Issues = "https://github.com/ipv6freely/pathmon-analyzer/issues"
+Changelog = "https://github.com/ipv6freely/pathmon-analyzer/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=24.0.0",
+]
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+]
+
+[project.scripts]
+pathmon = "pathmon_analyzer.cli:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.git
+    | \.venv
+    | build
+    | dist
+)/
+'''
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
