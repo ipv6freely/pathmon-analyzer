@@ -201,6 +201,94 @@ class TerminalVisualizer:
         self.console.print(timeline)
         self.console.print(f"[dim]{results[0].timestamp} → {results[-1].timestamp}[/dim]\n")
 
+    def print_path_changes(self, results: list[MtrResult]) -> None:
+        """Detect and print path changes across MTR samples."""
+        if len(results) < 2:
+            return
+
+        # Filter to results that have hops
+        results_with_hops = [r for r in results if r.hops]
+        if len(results_with_hops) < 2:
+            return
+
+        changes = []
+        prev_result = results_with_hops[0]
+        prev_path = {hop.hop_number: hop.host for hop in prev_result.hops}
+
+        for result in results_with_hops[1:]:
+            current_path = {hop.hop_number: hop.host for hop in result.hops}
+
+            # Check for changes at each hop
+            all_hops = set(prev_path.keys()) | set(current_path.keys())
+            for hop_num in sorted(all_hops):
+                prev_host = prev_path.get(hop_num)
+                curr_host = current_path.get(hop_num)
+
+                if prev_host != curr_host:
+                    # Skip if either is ??? (timeout) - not a real path change
+                    if prev_host == "???" or curr_host == "???":
+                        continue
+
+                    changes.append(
+                        {
+                            "timestamp": result.timestamp,
+                            "prev_timestamp": prev_result.timestamp,
+                            "hop": hop_num,
+                            "from": prev_host or "(none)",
+                            "to": curr_host or "(none)",
+                        }
+                    )
+
+            prev_result = result
+            prev_path = current_path
+
+        if not changes:
+            self.console.print(
+                Panel("[green]No path changes detected[/green]", title="Path Stability")
+            )
+            return
+
+        table = Table(
+            title=f"Path Changes Detected ({len(changes)})",
+            show_header=True,
+            header_style="bold yellow",
+        )
+
+        table.add_column("Time", style="dim")
+        table.add_column("Hop", justify="right")
+        table.add_column("From", style="red")
+        table.add_column("To", style="green")
+
+        for change in changes:
+            table.add_row(
+                change["timestamp"].strftime("%H:%M:%S"),
+                str(change["hop"]),
+                change["from"],
+                change["to"],
+            )
+
+        self.console.print(table)
+
+        # Summary of unique path variations
+        unique_hosts_per_hop: dict[int, set] = {}
+        for result in results_with_hops:
+            for hop in result.hops:
+                if hop.host != "???":
+                    if hop.hop_number not in unique_hosts_per_hop:
+                        unique_hosts_per_hop[hop.hop_number] = set()
+                    unique_hosts_per_hop[hop.hop_number].add(hop.host)
+
+        unstable_hops = {
+            hop: hosts for hop, hosts in unique_hosts_per_hop.items() if len(hosts) > 1
+        }
+
+        if unstable_hops:
+            self.console.print("\n[bold]Unstable Hops (multiple hosts seen):[/bold]")
+            for hop_num in sorted(unstable_hops.keys()):
+                hosts = unstable_hops[hop_num]
+                self.console.print(f"  Hop {hop_num}: {', '.join(sorted(hosts))}")
+            self.console.print()
+
     def print_httpstat_table(self, result: PathmonResult) -> None:
         """Print httpstat timing breakdown for a single result."""
         if not result.httpstat:

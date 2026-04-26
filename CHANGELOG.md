@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-04-26
+
+### Added
+- Path change detection - identifies when routing changes occur between MTR samples
+- Shows table of path changes with timestamp, hop number, and from/to hosts
+- Lists unstable hops that had multiple different hosts during analysis
+
+### Changed
+- HTTP issue summaries now show both the slow phase time and total time (e.g., "TCP connect time elevated (1034ms, total 1190ms)")
+- GCS bucket is now required - no default bucket name
+- Clear error message when bucket is not configured
+
 ## [0.1.0] - 2026-04-26
 
 ### Added

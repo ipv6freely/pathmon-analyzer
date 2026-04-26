@@ -187,6 +187,7 @@ def investigate(
     term_viz.print_summary(results, pathmon_name)
     console.print()
     term_viz.print_timeline(results)
+    term_viz.print_path_changes(results)
     term_viz.print_problematic_hops(results)
     term_viz.print_failure_details(results)
 
@@ -293,6 +294,7 @@ def analyze(
     term_viz.print_summary(results, pathmon_name)
     console.print()
     term_viz.print_timeline(results)
+    term_viz.print_path_changes(results)
     term_viz.print_problematic_hops(results)
 
     if output:
@@ -363,6 +365,7 @@ def recent(ctx, pathmon_name: str, hours: int):
     term_viz.print_summary(results, pathmon_name)
     console.print()
     term_viz.print_timeline(results)
+    term_viz.print_path_changes(results)
 
     failures = [r for r in results if not r.passed]
     if failures:

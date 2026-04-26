@@ -165,3 +165,102 @@ class TestTerminalVisualizer:
         summary = visualizer._generate_issue_summary(failures)
 
         assert "pathmon check failed" in summary
+
+
+class TestPathChangeDetection:
+    """Tests for path change detection."""
+
+    @pytest.fixture
+    def visualizer(self):
+        return TerminalVisualizer()
+
+    def test_detects_path_change(self, visualizer, capsys):
+        """Should detect when a hop changes between samples."""
+        from pathmon_analyzer.parser import MtrHop
+
+        results = [
+            PathmonResult(
+                timestamp=datetime(2024, 1, 15, 14, 30, 0, tzinfo=timezone.utc),
+                source="src",
+                destination="dst",
+                hops=[
+                    MtrHop(hop_number=1, host="10.0.0.1"),
+                    MtrHop(hop_number=2, host="router-a.example.com"),
+                    MtrHop(hop_number=3, host="192.168.1.1"),
+                ],
+            ),
+            PathmonResult(
+                timestamp=datetime(2024, 1, 15, 14, 31, 0, tzinfo=timezone.utc),
+                source="src",
+                destination="dst",
+                hops=[
+                    MtrHop(hop_number=1, host="10.0.0.1"),
+                    MtrHop(hop_number=2, host="router-b.example.com"),  # Changed!
+                    MtrHop(hop_number=3, host="192.168.1.1"),
+                ],
+            ),
+        ]
+        visualizer.print_path_changes(results)
+        captured = capsys.readouterr()
+
+        assert "Path Changes Detected" in captured.out
+        assert "router-a.example.com" in captured.out
+        assert "router-b.example.com" in captured.out
+
+    def test_no_path_changes(self, visualizer, capsys):
+        """Should report stable path when no changes."""
+        from pathmon_analyzer.parser import MtrHop
+
+        results = [
+            PathmonResult(
+                timestamp=datetime(2024, 1, 15, 14, 30, 0, tzinfo=timezone.utc),
+                source="src",
+                destination="dst",
+                hops=[
+                    MtrHop(hop_number=1, host="10.0.0.1"),
+                    MtrHop(hop_number=2, host="router.example.com"),
+                ],
+            ),
+            PathmonResult(
+                timestamp=datetime(2024, 1, 15, 14, 31, 0, tzinfo=timezone.utc),
+                source="src",
+                destination="dst",
+                hops=[
+                    MtrHop(hop_number=1, host="10.0.0.1"),
+                    MtrHop(hop_number=2, host="router.example.com"),
+                ],
+            ),
+        ]
+        visualizer.print_path_changes(results)
+        captured = capsys.readouterr()
+
+        assert "No path changes detected" in captured.out
+
+    def test_ignores_timeout_hops(self, visualizer, capsys):
+        """Should not report ??? timeouts as path changes."""
+        from pathmon_analyzer.parser import MtrHop
+
+        results = [
+            PathmonResult(
+                timestamp=datetime(2024, 1, 15, 14, 30, 0, tzinfo=timezone.utc),
+                source="src",
+                destination="dst",
+                hops=[
+                    MtrHop(hop_number=1, host="10.0.0.1"),
+                    MtrHop(hop_number=2, host="???"),
+                ],
+            ),
+            PathmonResult(
+                timestamp=datetime(2024, 1, 15, 14, 31, 0, tzinfo=timezone.utc),
+                source="src",
+                destination="dst",
+                hops=[
+                    MtrHop(hop_number=1, host="10.0.0.1"),
+                    MtrHop(hop_number=2, host="router.example.com"),
+                ],
+            ),
+        ]
+        visualizer.print_path_changes(results)
+        captured = capsys.readouterr()
+
+        assert "No path changes detected" in captured.out

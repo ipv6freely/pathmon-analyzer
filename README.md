@@ -120,6 +120,7 @@ The tool provides rich terminal output including:
   - HTTP metrics (total time, breakdown)
   - SIP metrics (packet loss, latency)
 - **Timeline**: Visual pass/fail indicator over time
+- **Path change detection**: Identifies when routing changes occur between samples
 - **Problematic hops**: Analysis of which hops consistently show issues
 - **Failure details**: Detailed breakdown of each failure including:
   - HTTP timing table (DNS, TCP connect, TLS handshake, server processing)
