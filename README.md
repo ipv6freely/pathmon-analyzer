@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Claude](https://img.shields.io/badge/Claude-Opus%204.5-6B5CE7?logo=anthropic)](https://www.anthropic.com/claude)
 
 CLI tool to analyze pathmon logs from GCS when investigating PagerDuty alerts for severe latency or packet loss.
 

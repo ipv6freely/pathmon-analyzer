@@ -1,6 +1,6 @@
 [project]
 name = "pathmon-analyzer"
-version = "0.1.1"
+version = "0.1.2"
 description = "Analyze pathmon MTR logs from GCS for latency and packet loss investigation"
 readme = "README.md"
 license = {text = "MIT"}
